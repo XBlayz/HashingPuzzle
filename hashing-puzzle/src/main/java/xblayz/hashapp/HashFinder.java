@@ -81,7 +81,7 @@ public class HashFinder implements Runnable {
         return p;
     }
 
-    private static long geometricSeries(int n, int p) {
+    public static long geometricSeries(int n, int p) {
         return (long)((n - Math.pow(n, p+1)) / (1-n));  // Geometric series formula
     }
 }
