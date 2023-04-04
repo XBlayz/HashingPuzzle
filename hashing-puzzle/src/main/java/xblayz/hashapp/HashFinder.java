@@ -4,6 +4,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.apache.commons.lang3.ArrayUtils;
 
+import xblayz.Timer;
+
 public class HashFinder implements Runnable {
     private final int n;        // Number of characters
     private final byte cMin;    // Byte representation of the first character
@@ -17,7 +19,9 @@ public class HashFinder implements Runnable {
     private int lastKLen = 0;   // Length of the last K string
     private long strOffset;     // Number of string with length less then the length of the current K string
 
-    public HashFinder(int n, byte cMin, int d, String s, long start, long end) {
+    public final Timer timer;
+
+    public HashFinder(int n, byte cMin, int d, String s, long start, long end, Timer timer) {
         this.n = n;
         this.cMin = cMin;
         this.d = d;
@@ -26,18 +30,22 @@ public class HashFinder implements Runnable {
 
         this.end = end;
         this.index = start;
+
+        this.timer = timer;
     }
 
     @Override
     public void run() {
-        while (this.index <= end) {
-            byte[] str = ArrayUtils.addAll(this.s, this.getNextK());    // Concatenation of the S and K string
+        while (this.index <= end && !Thread.currentThread().isInterrupted()) {
+            byte[] k = this.getNextK();
+            byte[] str = ArrayUtils.addAll(this.s, k);    // Concatenation of the S and K string
 
             String t = new DigestUtils(MessageDigestAlgorithms.SHA3_256).digestAsHex(str);  // Hashing of S+K
 
             if(t.substring(0, this.d).equals(this.zeros)){   // Check of the problem condition
-                System.out.println(t);
-                break;
+                System.out.println("H(" + new String(this.s) + " + " + new String(k) + ") = " + t);
+                Thread.currentThread().getThreadGroup().interrupt();
+                this.timer.endTimer();
             }
         }
     }

@@ -1,0 +1,9 @@
+\contentsline {section}{\numberline {1}Struttura della soluzione}{3}{}%
+\contentsline {subsection}{\numberline {1.1}Definizione dello spazio di ricerca}{3}{}%
+\contentsline {subsection}{\numberline {1.2}Suddivisione dello spazio di ricerca}{3}{}%
+\contentsline {subsection}{\numberline {1.3}Funzione di generazione delle stringhe}{3}{}%
+\contentsline {section}{\numberline {2}Implementazione}{5}{}%
+\contentsline {subsection}{\numberline {2.1}HashFinder class}{5}{}%
+\contentsline {subsubsection}{\numberline {2.1.1}Stato}{5}{}%
+\contentsline {subsubsection}{\numberline {2.1.2}Costruttori}{5}{}%
+\contentsline {subsubsection}{\numberline {2.1.3}Metodi}{6}{}%

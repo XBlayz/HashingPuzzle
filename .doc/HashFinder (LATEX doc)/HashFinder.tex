@@ -1,0 +1,76 @@
+\documentclass{article}
+
+\usepackage{amsfonts}
+
+\title{Hashing Puzzle}
+\author{Stefano Scarcelli}
+
+\begin{document}
+    \maketitle
+    \newpage    % Page 1
+
+    \tableofcontents
+    \newpage    % Page 2
+
+    \section{Struttura della soluzione}
+    La soluzione sviluppata si basa sull'idea di suddividere in modo equo lo spazio di ricerca della stringa \textit{K} sui i vari thread, valutando la validità della proprietà richiesta dal problema in parallelo.
+
+    \subsection{Definizione dello spazio di ricerca}
+    Per definire lo spazio di ricerca complessivo bisogna determinare il numero di stringhe che possono essere formate usando un alfabeto di \textit{N} caratteri con lunghezza da 1 a \textit{P}.\\
+
+    Questo può essere calcolate sommando il numero di disposizioni con ripetizioni delle varie stringhe di lunghezza da 1 a \textit{P}, che risulta essere più semplicemente calcolabile tramite la formula della somma dei primi \textit{P} termini della successione geometrica (partendo da 1 invece che 0)
+    \[ N_{k} = \sum_{i=1}^{P} D'_{N,i} = \sum_{i=1}^{P} N^i = \frac{N-N^{P+1}}{1-N} \]
+    \\
+    In questo modo possiamo rappresentare lo spazio di ricerca (tutte le possibili stringhe \textit{K}) tramite un numero
+    \[ Index \in [1, N_{k}] \]
+
+    \subsection{Suddivisione dello spazio di ricerca}
+    Per suddividere equamente lo spazio di ricerca sui vari thread basta passare ad essi due indici (\textsl{indice di inizio} e \textsl{indice di fine}) generati tramite queste due formule
+    \[ Index_{start}(i) = (i+1)\frac{N_{k}}{n_{thread}} \]
+    \[ Index_{end}(i) = i\frac{N_{k}}{n_{thread}}+1 \]
+    dove \textit{i} rappresenta \textsl{i-esimo} thread (che va da 0 a \textit{n\textsubscript{thread}}) e \textit{n\textsubscript{thread}} il numero di thread creati.
+
+    \subsection{Funzione di generazione delle stringhe}
+    L'ultimo passo per completare la soluzione è quello di determinare una funzione che prende in input un indice di una delle possibili stringhe \textit{K} e ne restituisce una sua rappresentazione facilmente decodificabile dal computer.\\
+    La scelta più naturale ricade su quella di rappresentare la stringa \textit{K} come un array di byte che usano la codifica \verb|UTF-8|.
+    \newpage    % Page 3
+
+    Questo array avrà una dimensione variabile da 1 a \textit{P} che dipenderà esclusivamente dall'indice, ed è possibile determinare la lunghezza verificando la seguente condizione
+    \[ Len_{k} \in \mathbb{N}: N_{k}(Len_{k}-1) <= Index <= N_{k}(Len_{k}) \]
+    testando in successione i vari valori che \textit{Len\textsubscript{k}} può assumere.\\
+
+    Una volta determinata la lunghezza dell'array è possibile decodificare l'indice della stringa in una sequenza di byte eseguendo quella che è una conversione di base da base 10 a base \textit{N}, tenendo però conto di azzerare il valore dell'indice ogni volta che si passa da una stringa di lunghezza \textit{Len\textsubscript{k}} a \textit{Len\textsubscript{k}}+1, sommando come offset il valore in byte (in codifica \verb|UTF-8|) del carattere più piccolo dell'alfabeto\footnote{Questo è possibile sfruttando la caratteristica che i caratteri dell'alfabeto usati per la costruzione della stringa \textit{K} sono consecutivi tra di loro.}.
+    \newpage    % Page 4
+
+    \section{Implementazione}
+    \subsection{HashFinder class}
+    L'implementazione della soluzione si base sulla classe \verb|HashFinder| che implementa l'interfaccia \verb|Runnable|.\\
+
+    \subsubsection{Stato}
+    La classe implementa le seguenti variabili di stato:
+    \begin{description}
+        \item[private final int n] Numero di caratteri dell'alfabeto della stringa K;
+        \item[private final byte cMin] Rappresentazione a byte (UTF-8) del 1° carattere dell'alfabeto di K;
+        \item[private final int d] Numero di zeri con cui la stringa T deve iniziare per soddisfare la condizione di soluzione;
+        \item[private final String zeros] Stringa di D zeri;
+        \item[{private final byte[] s}] Rappresentazione a byte (UTF-8) della stringa S definita dal problema;
+        \item[private final long end] Indice dell'ultima stringa K che questa istanza deve valutare;
+        \item[private long index] Indice della stringa K da valutare;
+        \item[private int lastKLen = 0] Lunghezza dell'ultima stringa K valutata (Inizializzata a 0 quando nessuna stringa K è stata ancora valutata);
+        \item[private long strOffset] Numero di stringhe K con lunghezza minore a quella correntemente in valutazione;
+     \end{description}
+
+     \subsubsection{Costruttori}
+     La classe implementa un solo costruttore che definisce l'istanza del thread impostando le varie variabili di stato \verb|final| e inizializza \verb|index|.
+     \newpage % Page 5
+
+     \subsubsection{Metodi}
+     La classe implementa un metodo statico e tre metodi dinamici, tra cui il metodo \verb|public void run()| per l'esecuzione in multithread. Gli altri metodi invece sono le vari implementazioni della struttura della soluzione.
+     \begin{description}
+        \item[public void run()] Esegue la valutazione delle stringe del thread testandone la proprietà;
+        \item[{private byte[] getNextK()}] Determina la stringa \textit{K} dell'indice corrente;
+        \item[private int kLen()] Determina la lunghezza dell'array della stringa \textit{K} dell'indice corrente;
+        \item[public static long geometricSeries(int n, int p)] Implementa la formula della successione geometrica;
+     \end{description}
+     
+\end{document}
