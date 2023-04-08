@@ -45,7 +45,7 @@ public class HashFinder implements Runnable {
             if(t.substring(0, this.d).equals(this.zeros)){   // Check of the problem condition
                 System.out.println("H(" + new String(this.s) + " + " + new String(k) + ") = " + t);
                 Thread.currentThread().getThreadGroup().interrupt();
-                this.timer.endTimer();
+                // this.timer.endTimer();
             }
         }
     }

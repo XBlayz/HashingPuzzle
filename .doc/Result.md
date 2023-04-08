@@ -1,0 +1,1 @@
+H(SisOp-Course A-Hashing-Puzzle- + ARZTDV) = 0000000b008ed830de3d08d081d13f38d84cf508e52d7d2dbfabfa1bbb47b7b9
