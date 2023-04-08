@@ -1,76 +1,168 @@
 \documentclass{article}
 
 \usepackage{amsfonts}
+\usepackage{pgfplots}
 
 \title{Hashing Puzzle}
 \author{Stefano Scarcelli}
 
 \begin{document}
-    \maketitle
-    \newpage    % Page 1
+   \maketitle
+   \newpage    % Page 1
 
-    \tableofcontents
-    \newpage    % Page 2
+   \tableofcontents
+   \newpage    % Page 2
 
-    \section{Struttura della soluzione}
-    La soluzione sviluppata si basa sull'idea di suddividere in modo equo lo spazio di ricerca della stringa \textit{K} sui i vari thread, valutando la validità della proprietà richiesta dal problema in parallelo.
+   \section{Struttura della soluzione}
+   La soluzione sviluppata si basa sull'idea di suddividere in modo equo lo spazio di ricerca della stringa \textit{K} sui i vari thread, valutando la validità della proprietà richiesta dal problema in parallelo.
 
-    \subsection{Definizione dello spazio di ricerca}
-    Per definire lo spazio di ricerca complessivo bisogna determinare il numero di stringhe che possono essere formate usando un alfabeto di \textit{N} caratteri con lunghezza da 1 a \textit{P}.\\
+   \subsection{Definizione dello spazio di ricerca}
+   Per definire lo spazio di ricerca complessivo bisogna determinare il numero di stringhe che possono essere formate usando un alfabeto di \textit{N} caratteri con lunghezza da 1 a \textit{P}.\\
 
-    Questo può essere calcolate sommando il numero di disposizioni con ripetizioni delle varie stringhe di lunghezza da 1 a \textit{P}, che risulta essere più semplicemente calcolabile tramite la formula della somma dei primi \textit{P} termini della successione geometrica (partendo da 1 invece che 0)
-    \[ N_{k} = \sum_{i=1}^{P} D'_{N,i} = \sum_{i=1}^{P} N^i = \frac{N-N^{P+1}}{1-N} \]
-    \\
-    In questo modo possiamo rappresentare lo spazio di ricerca (tutte le possibili stringhe \textit{K}) tramite un numero
-    \[ Index \in [1, N_{k}] \]
+   Questo può essere calcolate sommando il numero di disposizioni con ripetizioni delle varie stringhe di lunghezza da 1 a \textit{P}, che risulta essere più semplicemente calcolabile tramite la formula della somma dei primi \textit{P} termini della successione geometrica (partendo da 1 invece che 0)
+   \[ N_{k} = \sum_{i=1}^{P} D'_{N,i} = \sum_{i=1}^{P} N^i = \frac{N-N^{P+1}}{1-N} \]
+   \\
+   In questo modo possiamo rappresentare lo spazio di ricerca (tutte le possibili stringhe \textit{K}) tramite un numero
+   \[ Index \in [1, N_{k}] \]
 
-    \subsection{Suddivisione dello spazio di ricerca}
-    Per suddividere equamente lo spazio di ricerca sui vari thread basta passare ad essi due indici (\textsl{indice di inizio} e \textsl{indice di fine}) generati tramite queste due formule
-    \[ Index_{start}(i) = (i+1)\frac{N_{k}}{n_{thread}} \]
-    \[ Index_{end}(i) = i\frac{N_{k}}{n_{thread}}+1 \]
-    dove \textit{i} rappresenta \textsl{i-esimo} thread (che va da 0 a \textit{n\textsubscript{thread}}) e \textit{n\textsubscript{thread}} il numero di thread creati.
+   \subsection{Suddivisione dello spazio di ricerca}
+   Per suddividere equamente lo spazio di ricerca sui vari thread basta passare ad essi due indici (\textsl{indice di inizio} e \textsl{indice di fine}) generati tramite queste due formule
+   \[ Index_{start}(i) = (i+1)\frac{N_{k}}{n_{thread}} \]
+   \[ Index_{end}(i) = i\frac{N_{k}}{n_{thread}}+1 \]
+   dove \textit{i} rappresenta \textsl{i-esimo} thread (che va da 0 a \textit{n\textsubscript{thread}}) e \textit{n\textsubscript{thread}} il numero di thread creati.
 
-    \subsection{Funzione di generazione delle stringhe}
-    L'ultimo passo per completare la soluzione è quello di determinare una funzione che prende in input un indice di una delle possibili stringhe \textit{K} e ne restituisce una sua rappresentazione facilmente decodificabile dal computer.\\
-    La scelta più naturale ricade su quella di rappresentare la stringa \textit{K} come un array di byte che usano la codifica \verb|UTF-8|.
-    \newpage    % Page 3
+   \subsection{Funzione di generazione delle stringhe}
+   L'ultimo passo per completare la soluzione è quello di determinare una funzione che prende in input un indice di una delle possibili stringhe \textit{K} e ne restituisce una sua rappresentazione facilmente decodificabile dal computer.\\
+   La scelta più naturale ricade su quella di rappresentare la stringa \textit{K} come un array di byte che usano la codifica \verb|UTF-8|.
+   \newpage    % Page 3
 
-    Questo array avrà una dimensione variabile da 1 a \textit{P} che dipenderà esclusivamente dall'indice, ed è possibile determinare la lunghezza verificando la seguente condizione
-    \[ Len_{k} \in \mathbb{N}: N_{k}(Len_{k}-1) <= Index <= N_{k}(Len_{k}) \]
-    testando in successione i vari valori che \textit{Len\textsubscript{k}} può assumere.\\
+   Questo array avrà una dimensione variabile da 1 a \textit{P} che dipenderà esclusivamente dall'indice, ed è possibile determinare la lunghezza verificando la seguente condizione
+   \[ Len_{k} \in \mathbb{N}: N_{k}(Len_{k}-1) <= Index <= N_{k}(Len_{k}) \]
+   testando in successione i vari valori che \textit{Len\textsubscript{k}} può assumere.\\
 
-    Una volta determinata la lunghezza dell'array è possibile decodificare l'indice della stringa in una sequenza di byte eseguendo quella che è una conversione di base da base 10 a base \textit{N}, tenendo però conto di azzerare il valore dell'indice ogni volta che si passa da una stringa di lunghezza \textit{Len\textsubscript{k}} a \textit{Len\textsubscript{k}}+1, sommando come offset il valore in byte (in codifica \verb|UTF-8|) del carattere più piccolo dell'alfabeto\footnote{Questo è possibile sfruttando la caratteristica che i caratteri dell'alfabeto usati per la costruzione della stringa \textit{K} sono consecutivi tra di loro.}.
-    \newpage    % Page 4
+   Una volta determinata la lunghezza dell'array è possibile decodificare l'indice della stringa in una sequenza di byte eseguendo quella che è una conversione di base da base 10 a base \textit{N}, tenendo però conto di azzerare il valore dell'indice ogni volta che si passa da una stringa di lunghezza \textit{Len\textsubscript{k}} a \textit{Len\textsubscript{k}}+1, sommando come offset il valore in byte (in codifica \verb|UTF-8|) del carattere più piccolo dell'alfabeto\footnote{Questo è possibile sfruttando la caratteristica che i caratteri dell'alfabeto usati per la costruzione della stringa \textit{K} sono consecutivi tra di loro.}.
+   \newpage    % Page 4
 
-    \section{Implementazione}
-    \subsection{HashFinder class}
-    L'implementazione della soluzione si base sulla classe \verb|HashFinder| che implementa l'interfaccia \verb|Runnable|.\\
+   \section{Implementazione}
+   \subsection{HashFinder class}
+   L'implementazione della soluzione si base sulla classe \verb|HashFinder| che implementa l'interfaccia \verb|Runnable|.\\
 
-    \subsubsection{Stato}
-    La classe implementa le seguenti variabili di stato:
-    \begin{description}
-        \item[private final int n] Numero di caratteri dell'alfabeto della stringa K;
-        \item[private final byte cMin] Rappresentazione a byte (UTF-8) del 1° carattere dell'alfabeto di K;
-        \item[private final int d] Numero di zeri con cui la stringa T deve iniziare per soddisfare la condizione di soluzione;
-        \item[private final String zeros] Stringa di D zeri;
-        \item[{private final byte[] s}] Rappresentazione a byte (UTF-8) della stringa S definita dal problema;
-        \item[private final long end] Indice dell'ultima stringa K che questa istanza deve valutare;
-        \item[private long index] Indice della stringa K da valutare;
-        \item[private int lastKLen = 0] Lunghezza dell'ultima stringa K valutata (Inizializzata a 0 quando nessuna stringa K è stata ancora valutata);
-        \item[private long strOffset] Numero di stringhe K con lunghezza minore a quella correntemente in valutazione;
-     \end{description}
+   \subsubsection{Stato}
+   La classe implementa le seguenti variabili di stato:
+   \begin{description}
+      \item[private final int n] Numero di caratteri dell'alfabeto della stringa K;
+      \item[private final byte cMin] Rappresentazione a byte (UTF-8) del 1° carattere dell'alfabeto di K;
+      \item[private final int d] Numero di zeri con cui la stringa T deve iniziare per soddisfare la condizione di soluzione;
+      \item[private final String zeros] Stringa di D zeri;
+      \item[{private final byte[] s}] Rappresentazione a byte (UTF-8) della stringa S definita dal problema;
+      \item[private final long end] Indice dell'ultima stringa K che questa istanza deve valutare;
+      \item[private long index] Indice della stringa K da valutare;
+      \item[private int lastKLen = 0] Lunghezza dell'ultima stringa K valutata (Inizializzata a 0 quando nessuna stringa K è stata ancora valutata);
+      \item[private long strOffset] Numero di stringhe K con lunghezza minore a quella correntemente in valutazione;
+   \end{description}
 
-     \subsubsection{Costruttori}
-     La classe implementa un solo costruttore che definisce l'istanza del thread impostando le varie variabili di stato \verb|final| e inizializza \verb|index|.
-     \newpage % Page 5
+   \subsubsection{Costruttori}
+   La classe implementa un solo costruttore che definisce l'istanza del thread impostando le varie variabili di stato \verb|final| e inizializza \verb|index|.
+   \newpage % Page 5
 
-     \subsubsection{Metodi}
-     La classe implementa un metodo statico e tre metodi dinamici, tra cui il metodo \verb|public void run()| per l'esecuzione in multithread. Gli altri metodi invece sono le vari implementazioni della struttura della soluzione.
-     \begin{description}
-        \item[public void run()] Esegue la valutazione delle stringe del thread testandone la proprietà;
-        \item[{private byte[] getNextK()}] Determina la stringa \textit{K} dell'indice corrente;
-        \item[private int kLen()] Determina la lunghezza dell'array della stringa \textit{K} dell'indice corrente;
-        \item[public static long geometricSeries(int n, int p)] Implementa la formula della successione geometrica;
-     \end{description}
+   \subsubsection{Metodi}
+   La classe implementa un metodo statico e tre metodi dinamici, tra cui il metodo \verb|public void run()| per l'esecuzione in multithread. Gli altri metodi invece sono le vari implementazioni della struttura della soluzione.
+   \begin{description}
+      \item[public void run()] Esegue la valutazione delle stringe del thread testandone la proprietà;
+      \item[{private byte[] getNextK()}] Determina la stringa \textit{K} dell'indice corrente;
+      \item[private int kLen()] Determina la lunghezza dell'array della stringa \textit{K} dell'indice corrente;
+      \item[public static long geometricSeries(int n, int p)] Implementa la formula della successione geometrica;
+   \end{description}
+
+   \subsection{App class}
+   L'implementazione della soluzione viene eseguita tramite la classe \verb|App| grazie a due implementazioni del metodo \verb|public static void solvePuzzle|, uno dove i parametri rappresentano i dati minimi per definire il problema e un'altro (più generale) dove è possibile gestire il numero di thread da avviare, questo implementa la creazione ed avvio dei thread.
+
+   \section{Analisi delle prestazioni}
+   In aggiunta alla soluzione il codice implementa un sistema di misurazione del tempo di esecuzione che viene gestito tramite la creazione di un'istanza della classe \verb|Timer|.
+
+   \subsection{Timer class}
+   La classe implementa due variabili di stato un costruttore ed un metodo usati per determinare il tempo di esecuzione complessivo del programma.\\
+
+   Alla creazione dell'istanza la variabile di stato \verb|public Instant start| viene Inizializzata tramite la funzione \verb|Instant.now()|. Il riferimento dell'oggetto viene passato a tutti i thread e non appena uno di loro risolve il puzzle esso chiama su di esso il metodo \verb|public void endTimer()| che setta la variabile di stato \verb|public Instant end| tramite la funzione \verb|Instant.now()| e successivamente stampa la differenza tra l'inizio e la fine in millisecondi.
+   \newpage % Page 6
+
+   \subsection{Prestazioni}
+   Tramite il calcolo del tempo di esecuzione ho eseguito diverse run del programma con un diverso numero di thread per determinarne il numero ottimale.\\
+
+   \subsubsection{Metodologia dell'analisi}
+   Il tempo di esecuzione per ogni numero di thread è stato eseguito sulle seguenti istanza del problema (varie stringhe):
+   \begin{description}
+   \item[\textit{S}] = "Test-String-",\\ "Prova-Stringa-",\\ "String-Test-",\\ "Stringa-Prova-",\\ "SisOp-Course A-Hashing-Puzzle-" \footnote{I test sono stati eseguiti su più stringhe per poter sfruttare la proprietà di equi-distribuzione delle stringhe $K$ nello spazio dei risultati.}
+   \item[\textit{D}] = 6 \footnote{Il numero di zeri dell'hash è stato impostato a 6 per velocizzare le run dell'applicazione presupponendo un aumento esponenziale del tempo di ricerca della soluzione all'umettare di questo valore.}
+   \item[\textit{Len\textsubscript{k, max}}] = 6
+   \item[\textit{N}] = 36
+   \item[\textit{Char\textsubscript{0}}] = ':'
+   \end{description}
+
+   Per calcolare il tempo di esecuzione per ogni numero di thread si è calcolato la media su 5 run\footnote{Questo per cercare di eliminare possibili variazioni relative all'ambiente di esecuzione.} per ciascuna stringa, calcolandone successivamente una media aritmetica tra le medie delle run delle varie stringhe.
+   % Page 7
+
+   \subsubsection{Risultati}
+   \begin{tikzpicture}
+      \hspace*{-3cm}
+      \begin{axis}[
+         xlabel=$n_{thread}$,
+         ylabel=Run time ($ms$),
+         title={Run times test},
+         grid=both,
+         minor grid style={gray!25},
+         major grid style={gray!25},
+         width=0.75\linewidth,
+         clip mode=individual,
+         width=18cm, height=10cm]
+         \addplot[only marks,solid,color=red]
+            table[col sep=comma]{../Testing/runtimes-0.csv};
+         \addplot[only marks,solid,color=yellow]
+            table[col sep=comma]{../Testing/runtimes-1.csv};
+         \addplot[only marks,solid,color=green]
+            table[col sep=comma]{../Testing/runtimes-2.csv};
+         \addplot[only marks,solid,color=cyan]
+            table[col sep=comma]{../Testing/runtimes-3.csv};
+         \addplot[only marks,solid,color=teal]
+            table[col sep=comma]{../Testing/runtimes-4.csv};
+         \addplot[line width=1pt,solid,color=red]
+            table[col sep=comma]{../Testing/avrtimes-0.csv};
+         \addplot[line width=1pt,solid,color=yellow]
+            table[col sep=comma]{../Testing/avrtimes-1.csv};
+         \addplot[line width=1pt,solid,color=green]
+            table[col sep=comma]{../Testing/avrtimes-2.csv};
+         \addplot[line width=1pt,solid,color=cyan]
+            table[col sep=comma]{../Testing/avrtimes-3.csv};
+         \addplot[line width=1pt,solid,color=teal]
+            table[col sep=comma]{../Testing/avrtimes-4.csv};
+         \addplot[line width=2pt,solid,color=black]
+            table[col sep=comma]{../Testing/avrtimes.csv};
+         \addlegendentry{Single run (String 0)};
+         \addlegendentry{Single run (String 1)};
+         \addlegendentry{Single run (String 2)};
+         \addlegendentry{Single run (String 3)};
+         \addlegendentry{Single run (String 4)};
+         \addlegendentry{Average (String 0)};
+         \addlegendentry{Average (String 1)};
+         \addlegendentry{Average (String 2)};
+         \addlegendentry{Average (String 3)};
+         \addlegendentry{Average (String 4)};
+         \addlegendentry{Total average};
+      \end{axis}
+      \hspace*{3cm}
+   \end{tikzpicture}
+
+   \subsubsection{Analisi dei risultati}
+   Dai test è visibile come il programma tragga molto vantaggio dalla frammentazione in più thread, pur non rimanendo sempre consistente. Questo è dovuto al fatto che pur essendo le stringhe distribuite in modo casuale nello spazio di ricerca, l'esecuzione del programma con un diverso numero di thread può modificare la distanza massima tra il punto di partenza del thread con la stringa corretta più vicina ad esso. Questo non è prevedibile a priori per tanto non vi è un modo per ottimizzare in maniera perfetta l'esecuzione del programma.\\
+
+   Dai test si può anche denotare come il content switch dei vari thread non risulta particolarmente pesante per l'esecuzione del programma\footnote{Questo può essere dedotto dal fatto che il tempo di esecuzione non aumenta molto al superamento della soglia ottimale teorica del numero di thread $2 \cdot n_{core}$(nel test pari a $24$).} pur avendo un leggero effetto negativo sulle prestazioni generali del programma.
+   \newpage % Page 8
+
+   In conclusione dal test il valore ottimale risulta essere $4$ con $7$, $12$ e $13$ anche molto vicini. Il test purtroppo non è però in grado di determinare un valore generale ottimale\footnote{Il numero di stringhe analizzate risulta essere troppo piccolo rispetto allo spazio possibile di input.} ma è comunque in grado di darci una visone generale dell'andamento del problema e delle consistenze tra le varie stringhe testate.\\
+   
+   I punti a minore variazione risultano essere $21$ con $4$, $13$ e $12$ a seguire. Ancora una volta i valori vicini al valore teorico ottimale sembrano essere i migliori, di conseguenza l'esecuzione standard del programma viene eseguito su $2 \cdot n_{core}$ della macchina.
+
+   \section{Possibili ottimizzazioni}
+   *TODO
      
 \end{document}

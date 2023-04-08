@@ -13,6 +13,6 @@ public class Timer {
 
     public void endTimer() {
         this.end = Instant.now();
-        System.out.println(Duration.between(start, end));
+        System.out.println(Duration.between(start, end).toMillis());
     }
 }

@@ -7,7 +7,14 @@ import xblayz.hashapp.HashFinder;
  */
 public class App {
     public static void main(String[] args) {
+        //Args:
+        //  [0]: S
+        //  [1]: D
+        //  [2]: n_thread
+
         App.solvePuzzle("SisOp-Course A-Hashing-Puzzle-", 7, 6, 36, new String(":").getBytes()[0]);
+        // Testing:
+        // App.solvePuzzle(args[0], Integer.parseInt(args[1]), 6, 36, new String(":").getBytes()[0], Integer.parseInt(args[2]));
     }
 
     public static void solvePuzzle(String s, int d, int maxKLen, int nChar, byte firstChar) {

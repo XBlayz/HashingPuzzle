@@ -7,3 +7,11 @@
 \contentsline {subsubsection}{\numberline {2.1.1}Stato}{5}{}%
 \contentsline {subsubsection}{\numberline {2.1.2}Costruttori}{5}{}%
 \contentsline {subsubsection}{\numberline {2.1.3}Metodi}{6}{}%
+\contentsline {subsection}{\numberline {2.2}App class}{6}{}%
+\contentsline {section}{\numberline {3}Analisi delle prestazioni}{6}{}%
+\contentsline {subsection}{\numberline {3.1}Timer class}{6}{}%
+\contentsline {subsection}{\numberline {3.2}Prestazioni}{7}{}%
+\contentsline {subsubsection}{\numberline {3.2.1}Metodologia dell'analisi}{7}{}%
+\contentsline {subsubsection}{\numberline {3.2.2}Risultati}{8}{}%
+\contentsline {subsubsection}{\numberline {3.2.3}Analisi dei risultati}{8}{}%
+\contentsline {section}{\numberline {4}Possibili ottimizzazioni}{9}{}%
