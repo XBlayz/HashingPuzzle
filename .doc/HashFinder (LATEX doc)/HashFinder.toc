@@ -14,4 +14,3 @@
 \contentsline {subsubsection}{\numberline {3.2.1}Metodologia dell'analisi}{7}{}%
 \contentsline {subsubsection}{\numberline {3.2.2}Risultati}{8}{}%
 \contentsline {subsubsection}{\numberline {3.2.3}Analisi dei risultati}{8}{}%
-\contentsline {section}{\numberline {4}Possibili ottimizzazioni}{9}{}%
